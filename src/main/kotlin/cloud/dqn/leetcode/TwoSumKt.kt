@@ -1,7 +1,5 @@
 package cloud.dqn.leetcode
 
-import java.lang.UnsupportedOperationException
-
 /**
  *
  * Kotlin implementation
@@ -21,11 +19,19 @@ import java.lang.UnsupportedOperationException
 
 class TwoSumKt {
     class Solution {
-        fun twoSum(nums: Array<Int>, target: Int): Array<Int> {
-
-            throw UnsupportedOperationException()
-
+        fun twoSum(nums: Array<Int>, target: Int): Array<Int>? {
+            var i = 0
+            while (i + 1 < nums.size) {
+                var j = i + 1
+                while (j < nums.size) {
+                    if (nums[i] + nums[j] == target) {
+                        return arrayOf(i, j)
+                    }
+                    j++
+                }
+                i++
+            }
+            return null
         }
     }
-
 }
