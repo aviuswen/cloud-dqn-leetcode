@@ -35,8 +35,33 @@ class AddTwoNumbersKt {
     }
 
     class Solution {
-        fun addTwoNumbers(l1: ListNode, l2: ListNode) {
-            TODO("finish")
+        // parameters are non null as it is given in the problem
+        fun addTwoNumbers(l1: ListNode, l2: ListNode): ListNode? {
+            var carryOver = 0
+            var result: ListNode? = null
+            var tail: ListNode? = null
+
+            var list1: ListNode? = l1
+            var list2: ListNode? = l2
+            while (list1 != null || list2 != null) {
+                val val1 = list1?.value ?: 0
+                val val2 = list2?.value ?: 0
+                list1 = list1?.next
+                list2 = list2?.next
+
+                val combined = val1 + val2 + carryOver
+
+                carryOver = combined / 10
+
+                val newNode = ListNode(combined % 10)
+
+                if (result == null) {
+                    result = newNode
+                }
+                tail?.next = newNode
+                tail = newNode
+            }
+            return result
         }
     }
 }
