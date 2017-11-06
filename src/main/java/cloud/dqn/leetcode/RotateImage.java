@@ -38,18 +38,29 @@ public class RotateImage {
             upperLeft -> lowerLeft  :: [a][b] -> [n-b][a] -> [n-col][row]
 
         */
-            int n = matrix.length - 1;
-            for (int row = 0; row < matrix.length - 1; row++) {
-                for (int col = row; col < matrix.length - row - 1; col++) {
-                    int upperLeft = matrix[row][col];
-                    int upperRight = matrix[col][n-row];
-                    int lowerRight = matrix[n-row][n-col];
-                    int lowerLeft = matrix[n-col][row];
+            int maxIndex = matrix.length - 1;
 
-                    matrix[row][col] = lowerLeft; // upperLeft = lowerLeft
-                    matrix[n-col][row] = lowerRight; // lowerLeft = lowerRight
-                    matrix[n-row][n-col] = upperRight; // lowerRight = upperRight
-                    matrix[col][n-row] = upperLeft; // upperRight = upperLeft
+            for (int row = 0; row < maxIndex; row++) {
+                for (int col = row; col < maxIndex - row; col++) {
+
+                    /*
+                        int upperLeft = matrix[row][col];
+                        int upperRight = matrix[col][maxIndex-row];
+                        int lowerRight = matrix[maxIndex-row][maxIndex-col];
+                        int lowerLeft = matrix[maxIndex-col][row];
+
+                        matrix[row][col] = lowerLeft; // upperLeft = lowerLeft
+                        matrix[maxIndex-col][row] = lowerRight; // lowerLeft = lowerRight
+                        matrix[maxIndex-row][maxIndex-col] = upperRight; // lowerRight = upperRight
+                        matrix[col][maxIndex-row] = upperLeft; // upperRight = upperLeft
+                    */
+
+                    int temp = matrix[row][col]; // upperLeft
+                    matrix[row][col] = matrix[maxIndex-col][row]; // upperLeft = lowerLeft
+                    matrix[maxIndex-col][row] = matrix[maxIndex-row][maxIndex-col]; // lowerLeft = lowerRight
+                    matrix[maxIndex-row][maxIndex-col] = matrix[col][maxIndex-row]; // lowerRight = upperRight
+                    matrix[col][maxIndex-row] = temp;// upperRight = upperLeft
+
                 }
             }
         }
