@@ -18,20 +18,72 @@ package cloud.dqn.leetcode
  */
 
 class TwoSumKt {
-    class Solution {
-        fun twoSum(nums: Array<Int>, target: Int): Array<Int>? {
-            var i = 0
-            while (i + 1 < nums.size) {
-                var j = i + 1
-                while (j < nums.size) {
-                    if (nums[i] + nums[j] == target) {
-                        return arrayOf(i, j)
+    companion object {
+        val bar = "a"
+        @JvmStatic fun main(args: Array<String>) {
+            val arr: IntArray = intArrayOf(2, 0, 7, 11, 15)
+            var index = 0
+            val bar = Solution().twoSum(arr, 9)
+            println("hi")
+
+        }
+
+        class Solution {
+            fun twoSumsDoubleLoop(nums: IntArray, target: Int): IntArray {
+                var i = 0
+                val res = IntArray(2)
+                while (i + 1 < nums.size) {
+                    var j = i + 1
+                    while (j < nums.size) {
+                        if (nums[i] + nums[j] == target) {
+                            res[0] = i
+                            res[1] = j
+                            break
+                        }
+                        j++
                     }
-                    j++
+                    i++
                 }
-                i++
+                return res
             }
-            return null
+            // 526ms runtime =(
+            fun twoSumsForLoops(nums: IntArray, target: Int): IntArray {
+                val differenceToIndex = HashMap<Int, Int>(nums.size * 2)
+                nums.forEachIndexed { index, value ->
+                    differenceToIndex[target - value] = index
+                }
+                nums.forEachIndexed { index, value ->
+                    differenceToIndex[value]?.let { differenceIndex ->
+                        if (differenceIndex != index) {
+                            return intArrayOf(index, differenceIndex)
+                        }
+                    }
+                }
+
+                // leetcode compiler will timeout without return intArrau
+                // throw Exception("Given parameters outside of specifications")
+                return intArrayOf(-1, -1)
+            }
+
+            // Attempted optimization for time: 428ms =(
+            fun twoSum(nums: IntArray, target: Int): IntArray {
+                val differenceToIndex = HashMap<Int, Int>()
+                var index = 0
+                for (value in nums) {
+                    differenceToIndex[target - value] = index++
+                }
+                index = 0
+                for (value in nums) {
+                    differenceToIndex[value]?.let {
+                        if (it != index) {
+                            return intArrayOf(index, it)
+                        }
+                    }
+                    index++
+                }
+                return intArrayOf(-1,-1)
+            }
+
         }
     }
 }
