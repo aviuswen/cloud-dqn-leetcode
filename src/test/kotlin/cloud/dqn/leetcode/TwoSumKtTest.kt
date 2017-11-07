@@ -21,7 +21,7 @@ class TwoSumKtTest {
         val firstIndexSolution = 2
         val secondIndexSolution = 3
 
-        val solution = TwoSumKt.Companion.Solution().twoSums(nums, target)
+        val solution = TwoSumKt.Companion.Solution().twoSum(nums, target)
         Assert.assertTrue(solution.size == 2)
 
         val solutionFirstValue = solution.getOrNull(firstValue)
