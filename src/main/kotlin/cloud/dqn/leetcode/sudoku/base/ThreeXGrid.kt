@@ -1,21 +1,21 @@
 package cloud.dqn.leetcode.sudoku.base
 
-class ThreeXGrid {
-    private val grid: Array<GridValue>
+open class ThreeXGrid <T> {
+    private val grid: Array<GridValue<T>>
 
-    constructor(wildcard: GridValue) {
+    constructor(wildcard: GridValue<T>) {
         this.grid = Array(9, {wildcard})
     }
 
-    fun set(loc: Location, value: GridValue) {
+    protected fun set(loc: Location, value: GridValue<T>) {
         grid[locationToIndex[loc]!!] = value
     }
 
-    fun get(loc: Location): GridValue {
+    protected fun get(loc: Location): GridValue<T> {
         return grid[locationToIndex[loc]!!]
     }
 
-    fun get(row: Row): GridRow<GridValue> {
+    protected fun get(row: Row): GridRow<GridValue<T>> {
         return when (row) {
             Row.upper ->    GridRow(
                                 left = get(Location.upperLeft),
@@ -35,7 +35,7 @@ class ThreeXGrid {
         }
     }
 
-    fun get(col: Column): GridColumn<GridValue> {
+    protected fun get(col: Column): GridColumn<GridValue<T>> {
         return when (col) {
             Column.left ->       GridColumn(
                                     upper = get(Location.upperLeft),
