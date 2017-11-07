@@ -2,7 +2,9 @@ package cloud.dqn.leetcode.sudoku
 
 class Value {
     var actual: Int?
-    private var possible: HashSet<Int>
+    // TODO HashSet is overkill, used smaller spaced data type
+    // WARNING:: when reducing possible, you may find 'actual'
+    var possible: HashSet<Int>
 
     constructor(actual: Int? = null, possible: HashSet<Int>? = null) {
         this.actual = actual
@@ -22,13 +24,20 @@ class Value {
         this.possible = fullSetFactory( *exclude )
     }
 
+    override fun toString(): String = (actual ?: WILDCARD_CHAR).toString()
+
     fun isSolved(): Boolean = (actual != null)
 
     companion object {
 
         val EMPTY_SET = HashSet<Int>(0)
         private val SUDOKU_ROW_SIZE = 9
-        private val SUDOKU_VALID_RANGE = 1..9
+        private val WILDCARD_CHAR = '.'
+        private val CHAR_TO_VALID_INT = hashMapOf(
+                '1' to 1, '2' to 2, '3' to 3,
+                '4' to 4, '5' to 5, '6' to 6,
+                '7' to 7, '8' to 8, '9' to 9
+        )
 
         fun fullSetFactory(vararg exclude: Int): HashSet<Int> {
             val set = fullSet()
@@ -44,15 +53,15 @@ class Value {
                 null
             } else {
                 val possible = fullSet()
-                Array(SUDOKU_ROW_SIZE, init = { index ->
-                    val element = row[index].toInt()
-                    possible.remove(element)
-                    if (SUDOKU_VALID_RANGE.contains(element)) {
-                        Value(element)
-                    } else {
-                        Value(null, possible)
+                Array(
+                    size = SUDOKU_ROW_SIZE,
+                    init = { index ->
+                        val rawChar = row[index]
+                        val element: Int? = CHAR_TO_VALID_INT[rawChar]
+                        possible.remove(element)
+                        Value(element, possible)
                     }
-                })
+                )
             }
         }
     }

@@ -41,8 +41,7 @@ class Board {
     }
 
     override fun toString(): String {
-        val s = StringBuilder()
-        /*
+        /* Desired String:
         5 3 1 |  3 3 3 | 3 3 3
         5 3 1 |  3 3 3 | 3 3 3
         5 3 1 |  3 3 3 | 3 3 3
@@ -54,17 +53,58 @@ class Board {
         5 3 1 |  3 3 3 | 3 3 3
         5 3 1 |  3 3 3 | 3 3 3
         5 3 1 |  3 3 3 | 3 3 3
+
+        Note: each row is 23 chars in length with 11 total ==> 253 char
+
          */
-        TODO("stop point")
+        val s = StringBuilder(DEFAULT_STRING_BUILDER_CAPACITY)
+        (0..8).forEach {
+            appendRow(s, it)
+            if (it == 2 || it == 5) {
+                s.append(HORIZONTAL_DIVIDER)
+            }
+        }
+        return s.toString()
     }
 
+    private fun appendRow(s: StringBuilder, startRow: Int) {
+        val row: Array<Value> = grids[startRow]
+        THREE_TIMES.forEach {
+            append3GridValues(s, row, it * 3)
+            if (it != LAST_TIME) {
+                s.append(" | ")
+            }
+        }
+        s.append("\n")
+    }
+
+    private fun append3GridValues(s: StringBuilder, row: Array<Value>, startCol: Int) {
+        s.append("${row[startCol]} ${row[startCol + 1]} ${row[startCol + 2]}")
+    }
 
     companion object {
         val NUM_ROWS = 9
         val NUM_COL = 9
         val CRAP_GRID: Array<CharArray> = Array(0, {charArrayOf()})
+        private val DEFAULT_STRING_BUILDER_CAPACITY = 256
+        private val LAST_TIME = 2
+        private val THREE_TIMES = 0..LAST_TIME
+        private val HORIZONTAL_DIVIDER = "----------------------\n"
+        public fun genEmptyBoard(): Array<CharArray> {
+            return arrayOf(
+                    charArrayOf('.', '.', '.',   '.', '.', '.',   '.', '.', '.'),
+                    charArrayOf('.', '.', '.',   '.', '.', '.',   '.', '.', '.'),
+                    charArrayOf('.', '.', '.',   '.', '.', '.',   '.', '.', '.'),
 
+                    charArrayOf('.', '.', '.',   '.', '.', '.',   '.', '.', '.'),
+                    charArrayOf('.', '.', '.',   '.', '.', '.',   '.', '.', '.'),
+                    charArrayOf('.', '.', '.',   '.', '.', '.',   '.', '.', '.'),
 
+                    charArrayOf('.', '.', '.',   '.', '.', '.',   '.', '.', '.'),
+                    charArrayOf('.', '.', '.',   '.', '.', '.',   '.', '.', '.'),
+                    charArrayOf('.', '.', '.',   '.', '.', '.',   '.', '.', '.')
+            )
+        }
     }
 
 }
