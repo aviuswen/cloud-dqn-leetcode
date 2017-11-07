@@ -1,5 +1,6 @@
 package cloud.dqn.leetcode.sudoku
 
+@Deprecated("Moving to singleCelStyle")
 class ThreeX {
     var firstRow: Triple
     var secondRow: Triple

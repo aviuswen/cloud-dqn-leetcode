@@ -1,5 +1,6 @@
 package cloud.dqn.leetcode.sudoku
 
+@Deprecated("Moving to singleCelStyle")
 class Triple {
     var first: Int
     var second: Int
