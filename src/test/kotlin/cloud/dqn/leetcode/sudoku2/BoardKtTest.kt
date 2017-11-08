@@ -163,6 +163,7 @@ class BoardKtTest {
         if (!solved) {
             val guessBoard = board.guessOneAndSeeIfItWorks(OUTPUT)
             Assert.assertNotNull(guessBoard)
+            Assert.assertTrue(guessBoard!!.allDone())
         }
     }
 

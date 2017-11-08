@@ -1,7 +1,5 @@
 package cloud.dqn.leetcode.sudoku2
 
-import java.util.*
-
 class Board {
 
     val grids: Array<Array<DigitValue>>
@@ -100,11 +98,7 @@ class Board {
     private fun solver_boxAndLine(row: Int, col: Int): Boolean {
         val digitValue = grids[row][col]
         if (digitValue.isNotSolved()) {
-            arrayOf(
-                    possibleCollectForContaining3x3Box(row, col),
-                    possibleCollectForColumn(row, col),
-                    possibleCollectForRow(row, col)
-            ).forEach { possibleSet ->
+            collectAllPossibles(row, col).forEach { possibleSet ->
                 digitValue.forEach {
                     if (!possibleSet.contains(it)) {
                         digitValue.setSolved(it)
@@ -150,7 +144,7 @@ class Board {
             BOARD_INDEX_RANGE.forEach { colIndex ->
                 val digitValue = grids[rowIndex][colIndex]
                 if (digitValue.isNotSolved()) {
-                    digitValue.removeAllPossible(solvedCollectAll(rowIndex, colIndex))
+                    digitValue.removeAllPossible(collectAllSolved(rowIndex, colIndex))
                     // you just solved something, you need to update the ones
                     // you just updated
                     newSolved = newSolved || digitValue.isSolved()
@@ -162,58 +156,43 @@ class Board {
         }
     }
 
-    private fun solvedCollectAll(row: Int, col: Int): HashSet<Int> {
-        val s = solvedCollectForContaining3x3Box(row, col)
-        s.addAll(solvedCollectForColumn(col))
-        s.addAll(solvedCollectedForRow(row))
-        return s
-    }
+    private fun collectAllSolved(row: Int, col: Int): DigitSet {
+        val solutions = DigitSet.emptyDigitSet()
 
-    private fun solvedCollectForContaining3x3Box(row: Int, col: Int): HashSet<Int> {
-        // (0,1,2) -> 0
-        // (3,4,5) -> 3
-        // (6,7,8) -> 6
+        // collect solved for containing 3x3 box
         val rowOrigin = (row / 3) * 3
         val colOrigin = (col / 3) * 3
-        val solutions = HashSet<Int>()
         THREE_TIMES.forEach { rowOffset ->
             THREE_TIMES.forEach { colOffset ->
-                val value = grids[rowOrigin + rowOffset][colOrigin + colOffset]
-                value.getSolved()?.let {
-                    solutions.add(it)
-                }
+                val digitValue = grids[rowOrigin + rowOffset][colOrigin + colOffset]
+                digitValue.getSolved()?.let { solutions.add(it) }
             }
         }
-        return solutions
-    }
 
-    private fun solvedCollectForColumn(col: Int): HashSet<Int> {
-        val solutions = HashSet<Int>()
-        BOARD_INDEX_RANGE.forEach { rowIndex ->
-            grids[rowIndex][col].getSolved()?.let {
+        BOARD_INDEX_RANGE.forEach {
+            // collect solved by Column
+            grids[it][col].getSolved()?.let {
+                solutions.add(it)
+            }
+
+            // collect solved by Row
+            grids[row][it].getSolved()?.let {
                 solutions.add(it)
             }
         }
-        return solutions
-    }
 
-    private fun solvedCollectedForRow(row: Int): HashSet<Int> {
-        val solutions = HashSet<Int>()
-        BOARD_INDEX_RANGE.forEach { colIndex ->
-            grids[row][colIndex].getSolved()?.let {
-                solutions.add(it)
-            }
-        }
         return solutions
     }
 
     /********************************************************
      * POSSIBLES COLLECTORS
      ********************************************************/
-    private fun possibleCollectForContaining3x3Box(rowExclude: Int, colExclude: Int): HashSet<Int> {
+    private fun collectAllPossibles(rowExclude: Int, colExclude: Int): Array<DigitSet> {
+        val possibles = Array(3, {DigitSet.emptyDigitSet()})
+
+        // collect possibles from contain 3x3 box
         val rowOrigin = (rowExclude / 3) * 3
         val colOrigin = (colExclude / 3) * 3
-        val possibles = HashSet<Int>()
         THREE_TIMES.forEach { rowOffset ->
             THREE_TIMES.forEach { colOffset ->
                 val rowActual = rowOrigin + rowOffset
@@ -221,39 +200,30 @@ class Board {
                 if (rowActual != rowExclude || colActual != colExclude) {
                     val digitValue = grids[rowActual][colActual]
                     if (digitValue.isNotSolved()) {
-                        possibles.addAll(digitValue)
+                        possibles[0].addAll(digitValue)
                     }
                 }
             }
         }
-        return possibles
-    }
 
-    // colExclude stays constant
-    private fun possibleCollectForColumn(rowExclude: Int, colExclude: Int): HashSet<Int> {
-        val possibles = HashSet<Int>()
-        BOARD_INDEX_RANGE.forEach { rowIndex ->
-            if (rowIndex != rowExclude) {
-                val digitValue = grids[rowIndex][colExclude]
+        BOARD_INDEX_RANGE.forEach {
+            // collect possibles from column
+            if (it != rowExclude) {
+                val digitValue = grids[it][colExclude]
                 if (digitValue.isNotSolved()) {
-                    possibles.addAll(digitValue)
+                    possibles[1].addAll(digitValue)
+                }
+            }
+
+            // collect possibles from row
+            if (it != colExclude) {
+                val digitValue = grids[rowExclude][it]
+                if (digitValue.isNotSolved()) {
+                    possibles[2].addAll(digitValue)
                 }
             }
         }
-        return possibles
-    }
 
-    // rowExclude stays constant
-    private fun possibleCollectForRow(rowExclude: Int, colExclude: Int): HashSet<Int> {
-        val possibles = HashSet<Int>()
-        BOARD_INDEX_RANGE.forEach { colIndex ->
-            if (colIndex != colExclude) {
-                val digitValue = grids[rowExclude][colIndex]
-                if (digitValue.isNotSolved()) {
-                    possibles.addAll(digitValue)
-                }
-            }
-        }
         return possibles
     }
 
@@ -270,30 +240,26 @@ class Board {
     }
 
     private fun findInvalidBy3x3Box(): Pair<Int, Int>? {
-        THREE_TIMES.forEach { rowFactor ->
-            THREE_TIMES.forEach { colFactor ->
-                val allValues = HashSet<Int>()
-                THREE_TIMES.forEach{ rowOffSet ->
-                    THREE_TIMES.forEach { colOffset ->
-                        val rowActual = rowFactor * 3 + rowOffSet
-                        val colActual = colFactor * 3 + colOffset
-                        val digitValue = grids[rowActual][colActual]
-                        digitValue.getSolved()?.let {
-                            if (allValues.contains(it)) {
-                                return (rowActual to colActual)
-                            } else {
-                                allValues.add(it)
-                            }
-                        }
+        THREE_TIMES.forEach { rowFactor -> THREE_TIMES.forEach { colFactor ->
+            val allValues = DigitSet.emptyDigitSet()
+            THREE_TIMES.forEach{ rowOffSet -> THREE_TIMES.forEach { colOffset ->
+                val rowActual = rowFactor * 3 + rowOffSet
+                val colActual = colFactor * 3 + colOffset
+                val digitValue = grids[rowActual][colActual]
+                digitValue.getSolved()?.let {
+                    if (allValues.contains(it)) {
+                        return (rowActual to colActual)
+                    } else {
+                        allValues.add(it)
                     }
                 }
-            }
-        }
+            } }
+        } }
         return null
     }
 
     private fun findInvalidPairByCol(col: Int): Pair<Int, Int>? {
-        val allValues = HashSet<Int>()
+        val allValues = DigitSet.emptyDigitSet()
         BOARD_INDEX_RANGE.forEach { row ->
             grids[row][col].getSolved()?.let {
                 if (allValues.contains(it)) {
@@ -308,7 +274,7 @@ class Board {
     }
 
     private fun findInvalidPairByRow(row: Int): Pair<Int, Int>? {
-        val allValues = HashSet<Int>()
+        val allValues = DigitSet.emptyDigitSet()
         val workingRow = grids[row]
         workingRow.forEachIndexed { col, value ->
             value.getSolved()?.let {
@@ -386,6 +352,150 @@ class Board {
 
     private fun append3GridValues(s: StringBuilder, row: Array<DigitValue>, startCol: Int) {
         s.append("${row[startCol]} ${row[startCol + 1]} ${row[startCol + 2]}")
+    }
+
+    /********************************************************
+     *
+     *
+     *                  NESTED SUB CLASSES
+     *
+     *
+     ********************************************************/
+
+    class DigitSet: Iterable<Int> {
+        private val set: BooleanArray
+        private var size: Int
+
+        private constructor() {
+            size = SIZE
+            set = BooleanArray(ACTUAL_SIZE)
+        }
+
+        constructor(value: Int? = null) {
+            if (value == null || !inRange(value)) {
+                set = BooleanArray(ACTUAL_SIZE, {true})
+                size = SIZE
+            } else {
+                set = BooleanArray(ACTUAL_SIZE, {false})
+                size = 1
+                set[value] = true
+            }
+            set[0] = false
+        }
+
+        constructor(digitSet: DigitSet) {
+            size = digitSet.size
+            set = BooleanArray( ACTUAL_SIZE, { digitSet.set[it] } )
+        }
+
+        fun getSize() = size
+
+        fun isEmpty() = (size == 0)
+
+        fun getFirst(): Int {
+            set.forEachIndexed { index, b ->
+                if (b) {
+                    return index
+                }
+            }
+            return -1
+        }
+
+        /**
+         * @returns true if set was changed
+         */
+        fun add(value: Int?): Boolean {
+            var valueWasMissing = false
+            value?.let {
+                if (inRange(it)) {
+                    valueWasMissing = !(set[it])
+                    set[it] = true
+                    if (valueWasMissing) {
+                        size++
+                    }
+                }
+            }
+            return valueWasMissing
+        }
+
+        fun addAll(iterable: Iterable<Int?>) = iterable.forEach { add(it) }
+
+        /**
+         * @return true if value was present in set
+         */
+        fun remove(value: Int?): Boolean {
+            var setChanged = false
+            value?.let {
+                if (inRange(it)) {
+                    setChanged = set[it]
+                    set[it] = false
+                    if (setChanged) {
+                        size--
+                    }
+                }
+            }
+            return setChanged
+        }
+
+        fun removeAll(iterable: Iterable<Int?>) = iterable.forEach {remove(it)}
+
+        fun clear() = set.forEachIndexed { index, _ -> set[index] = false }
+
+        fun contains(value: Int?): Boolean {
+            value?.let {
+                if (inRange(it)) {
+                    return set[it]
+                }
+            }
+            return false
+        }
+
+        override fun iterator(): Iterator<Int> {
+            return DigitIterator(set)
+        }
+
+        private class DigitIterator: Iterator<Int> {
+
+            val array: BooleanArray
+
+            var nextValue: Int
+
+            constructor(array: BooleanArray) {
+                this.array = array
+                this.nextValue = 1
+                walkStartToNextValid()
+            }
+
+            private fun walkStartToNextValid() {
+                while (nextValue < ACTUAL_SIZE) {
+                    if (!array[nextValue]) {
+                        nextValue++
+                    } else {
+                        break
+                    }
+                }
+            }
+
+            override fun hasNext(): Boolean {
+                return nextValue < ACTUAL_SIZE
+            }
+
+            override fun next(): Int {
+                val element = nextValue
+                nextValue++
+                walkStartToNextValid()
+                return element
+            }
+        }
+
+        companion object {
+            private val SIZE = 9
+            private val ACTUAL_SIZE = 10
+            private fun inRange(value: Int): Boolean =  value > 0 && value <= 9
+            fun emptyDigitSet(): DigitSet {
+                return DigitSet()
+            }
+        }
     }
 
     class DigitValue: Iterable<Int> {
