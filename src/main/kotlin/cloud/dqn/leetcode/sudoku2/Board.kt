@@ -25,6 +25,31 @@ class Board {
         reduceAllPossibleFromSolved()
     }
 
+    constructor(board: Board) {
+        grids = Array(
+            size = BOARD_SIZE,
+            init = { index ->
+                Value.rowFactory(board.grids[index])
+            }
+        )
+        reduceAllPossibleFromSolved()
+    }
+
+    fun allDone(): Boolean {
+        var done = true
+        BOARD_INDEX_RANGE.forEach { row ->
+            BOARD_INDEX_RANGE.forEach { col ->
+                if (grids[row][col].isNotSolved()) {
+                    done = false
+                }
+            }
+        }
+        return done
+    }
+
+    /********************************************************
+     * SOLVERS
+     ********************************************************/
     fun solve(targetCopy: Array<CharArray>): Boolean {
         var solvedOne = false
         do {
@@ -43,21 +68,6 @@ class Board {
         return allDone() && (findInvalid() == null)
     }
 
-    fun allDone(): Boolean {
-        var done = true
-        BOARD_INDEX_RANGE.forEach { row ->
-            BOARD_INDEX_RANGE.forEach { col ->
-                if (grids[row][col].isNotSolved()) {
-                    done = false
-                }
-            }
-        }
-        return done
-    }
-
-    /********************************************************
-     * SOLVERS
-     ********************************************************/
     /**
      * Iterates through all values once and tries to solve it
      * @return true if one value was solved
@@ -106,6 +116,30 @@ class Board {
 
         }
         return false
+    }
+
+    /**
+     * Iterates through all non solved cells and tries
+     * a possible value for a given cell and sees if it is
+     * solvable.
+     */
+    fun guessOneAndSeeIfItWorks(targetCopy: Array<CharArray>): Board? {
+        BOARD_INDEX_RANGE.forEach { row ->
+            BOARD_INDEX_RANGE.forEach { col ->
+                val value = grids[row][col]
+                if (value.isNotSolved()) {
+                    value.possible.forEach {
+                        val testBoard = Board(this)
+                        testBoard.grids[row][col].setSolved(it)
+                        val solvable = testBoard.solve(targetCopy)
+                        if (solvable) {
+                            return testBoard
+                        }
+                    }
+                }
+            }
+        }
+        return null
     }
 
     /********************************************************
@@ -358,4 +392,57 @@ class Board {
     }
 
 
+    class Value {
+        var possible: HashSet<Int>
+
+        constructor() {
+            possible = fullSetFactory()
+        }
+
+        constructor(value: Value) {
+            possible = HashSet(value.possible)
+        }
+
+        fun setSolved(num: Int) {
+            possible = hashSetOf(num)
+        }
+
+        fun getSolved(): Int? {
+            return if (possible.size == 1) {
+                possible.first()
+            } else {
+                null
+            }
+        }
+
+        fun isNotSolved(): Boolean = (possible.size != 1)
+
+        override fun toString(): String {
+            return getSolved()?.toString() ?: WILDCARD_STR
+        }
+
+        companion object {
+            fun fullSetFactory(): HashSet<Int> = hashSetOf(1,2,3,4,5,6,7,8,9)
+            val WILDCARD_CHAR = '.'
+            private val WILDCARD_STR = WILDCARD_CHAR.toString()
+            fun rowFactory(columnCount: Int): Array<Value> {
+                return if (columnCount <= 0) {
+                    emptyArray()
+                } else {
+                    Array(
+                        size = columnCount,
+                        init = { Value() }
+                    )
+                }
+            }
+            fun rowFactory(values: Array<Value>): Array<Value> {
+                return Array(
+                    size = values.size,
+                    init = { index ->
+                        Value(values[index])
+                    }
+                )
+            }
+        }
+    }
 }
