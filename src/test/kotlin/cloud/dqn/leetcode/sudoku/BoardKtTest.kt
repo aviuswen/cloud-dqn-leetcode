@@ -41,4 +41,41 @@ class BoardKtTest {
         val str = board.toString()
         println(str)
     }
+
+    @Test
+    fun calculateBruteForceIterationsTest() {
+        val board = Board(TEST_ARRAY)
+        val calc = board.calculateBruteForceIterations()
+        board.boardedBoxesReducePossibles()
+        val calcAfter = board.calculateBruteForceIterations()
+        println("hi")
+    }
+
+    @Test
+    fun lineReduceTest() {
+        val board = Board(TEST_ARRAY)
+        val calc = board.calculateBruteForceIterations()
+        board.boardedBoxesReducePossibles()
+        board.lineReduceAll()
+        board.boardedBoxesReducePossibles()
+        val stdReductions = board.calculateBruteForceIterations()
+
+        println("\nstdReduction\n$board\n")
+
+        board.boxSolverAll()
+
+        val afterBoxSolver = board.calculateBruteForceIterations()
+
+        println("post\n$board")
+
+        board.boardedBoxesReducePossibles()
+        board.lineReduceAll()
+
+        println("stdDeduction\n$board")
+
+        val afterReStandardDeduction = board.calculateBruteForceIterations()
+
+        println("afterReStandardDeduction\n$board")
+        println("hi")
+    }
 }

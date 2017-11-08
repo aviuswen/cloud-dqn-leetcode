@@ -1,5 +1,6 @@
 package cloud.dqn.leetcode.sudoku
 
+@Deprecated("see sudoku2 package")
 class Value {
     var actual: Int?
     // TODO HashSet is overkill, used smaller spaced data type
@@ -24,6 +25,24 @@ class Value {
         this.possible = fullSetFactory( *exclude )
     }
 
+    /**
+     * Also updates actual if needed
+     *
+     * @return num of elements removed from possible
+     */
+    fun removePossible(iterable: Iterable<Int>): Int {
+        var numRemoved = 0
+        iterable.forEach {
+            if (possible.remove(it)) {
+                numRemoved++
+            }
+        }
+        if (possible.size == 1 && actual == null) {
+            actual = possible.first()
+        }
+        return numRemoved
+    }
+
     override fun toString(): String = (actual ?: WILDCARD_CHAR).toString()
 
     fun isSolved(): Boolean = (actual != null)
@@ -45,7 +64,7 @@ class Value {
             return set
         }
 
-        private fun fullSet(): HashSet<Int> = hashSetOf(1,2,3,4,5,6,7,8,9)
+        fun fullSet(): HashSet<Int> = hashSetOf(1,2,3,4,5,6,7,8,9)
 
         @Throws(IndexOutOfBoundsException::class)
         fun rowFactory(row: CharArray?): Array<Value>? {
