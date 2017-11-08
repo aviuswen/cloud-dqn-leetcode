@@ -1,5 +1,7 @@
 package cloud.dqn.leetcode.sudoku2
 
+import java.util.*
+
 class Board {
 
     val grids: Array<Array<Value>>
@@ -422,7 +424,7 @@ class Board {
         }
 
         companion object {
-            fun fullSetFactory(): HashSet<Int> = hashSetOf(1,2,3,4,5,6,7,8,9)
+            private fun fullSetFactory(): HashSet<Int> = hashSetOf(1,2,3,4,5,6,7,8,9)
             val WILDCARD_CHAR = '.'
             private val WILDCARD_STR = WILDCARD_CHAR.toString()
             fun rowFactory(columnCount: Int): Array<Value> {
@@ -441,6 +443,60 @@ class Board {
                     init = { index ->
                         Value(values[index])
                     }
+                )
+            }
+        }
+    }
+
+    class DigitValue {
+        private var solved: Int
+        private val possible: DigitSet
+
+        constructor() {
+            solved = UNSOLVED_VALUE
+            possible = DigitSet()
+        }
+
+        constructor(digitValue: DigitValue) {
+            solved = digitValue.solved
+            possible = DigitSet(digitValue.possible)
+        }
+
+        fun isNotValid(): Boolean = (possible.isEmpty() && isNotSolved())
+
+        fun setSolved(num: Int) { solved = num }
+
+        fun getSolved(): Int? = if (isSolved()) solved else null
+
+        fun isSolved(): Boolean = (solved != UNSOLVED_VALUE)
+
+        fun isNotSolved(): Boolean = !isSolved()
+
+        fun removeAll(iterable: Iterable<Int>) {
+            possible.removeAll(iterable)
+            if (possible.getSize() == 1 && isNotSolved()) {
+                solved = possible.getFirst()
+            }
+        }
+
+        override fun toString(): String = getSolved()?.toString() ?: WILDCARD_STR
+
+        companion object {
+            val UNSOLVED_VALUE = 0
+            val WILDCARD_CHAR = '.'
+            private val WILDCARD_STR = WILDCARD_CHAR.toString()
+
+            fun rowFactory(columnCount: Int): Array<DigitValue> {
+                return Array(
+                        size = columnCount,
+                        init = { DigitValue() }
+                )
+            }
+
+            fun rowFactory(values: Array<DigitValue>): Array<DigitValue> {
+                return Array(
+                        size = values.size,
+                        init = { DigitValue(values[it]) }
                 )
             }
         }

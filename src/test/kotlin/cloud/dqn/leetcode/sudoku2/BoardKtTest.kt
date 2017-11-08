@@ -159,17 +159,15 @@ class BoardKtTest {
     @Test
     fun leetCode2() {
         val board = Board(LEETCODE2)
-        println("INITIAL BOARD:\n$board")
         val solved = board.solve(OUTPUT)
-        val invalid = board.findInvalid()
-        val done = board.allDone()
         if (!solved) {
             val guessBoard = board.guessOneAndSeeIfItWorks(OUTPUT)
-            if (guessBoard != null) {
-                println("SOLVED WITH TEST BOARD\n$guessBoard")
-            }
+            Assert.assertNotNull(guessBoard)
         }
-        println("POST RUN\n$board")
-        println("end")
+    }
+
+    @Test
+    fun bitMaskingDeveloping() {
+
     }
 }
