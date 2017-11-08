@@ -23,7 +23,7 @@ class DigitSet: Iterable<Int> {
 
     constructor(digitSet: DigitSet) {
         size = digitSet.size
-        set = BooleanArray( digitSet.size, { digitSet.set[it] } )
+        set = BooleanArray( ACTUAL_SIZE, { digitSet.set[it] } )
     }
 
     fun getSize() = size
@@ -108,6 +108,8 @@ class DigitSet: Iterable<Int> {
             while (nextValue < ACTUAL_SIZE) {
                 if (!array[nextValue]) {
                     nextValue++
+                } else {
+                    break
                 }
             }
         }

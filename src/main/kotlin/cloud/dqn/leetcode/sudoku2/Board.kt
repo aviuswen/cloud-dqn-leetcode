@@ -4,7 +4,7 @@ import java.util.*
 
 class Board {
 
-    val grids: Array<Array<Value>>
+    val grids: Array<Array<DigitValue>>
 
     /**
      * By default create an empty board
@@ -12,7 +12,7 @@ class Board {
     private constructor() {
         grids = Array(
             size = BOARD_SIZE,
-            init = { Value.rowFactory(BOARD_SIZE) }
+            init = { DigitValue.rowFactory(BOARD_SIZE) }
         )
     }
 
@@ -31,7 +31,7 @@ class Board {
         grids = Array(
             size = BOARD_SIZE,
             init = { index ->
-                Value.rowFactory(board.grids[index])
+                DigitValue.rowFactory(board.grids[index])
             }
         )
         reduceAllPossibleFromSolved()
@@ -61,9 +61,8 @@ class Board {
         // copy over to targetCopy
         BOARD_INDEX_RANGE.forEach { row ->
             BOARD_INDEX_RANGE.forEach { col ->
-                val value = grids[row][col].getSolved()?.let {
-                    targetCopy[row][col] = INT_TO_CHAR[it] ?: Value.WILDCARD_CHAR
-                }
+                val num = grids[row][col].getSolved() ?: -1
+                targetCopy[row][col] = INT_TO_CHAR[num] ?: DigitValue.WILDCARD_CHAR
             }
         }
 
@@ -99,23 +98,21 @@ class Board {
      * @return true if solved
      */
     private fun solver_boxAndLine(row: Int, col: Int): Boolean {
-        val value = grids[row][col]
-        if (value.isNotSolved()) {
+        val digitValue = grids[row][col]
+        if (digitValue.isNotSolved()) {
             arrayOf(
                     possibleCollectForContaining3x3Box(row, col),
                     possibleCollectForColumn(row, col),
                     possibleCollectForRow(row, col)
             ).forEach { possibleSet ->
-                value.possible.forEach { possibleValue ->
-                    if (!possibleSet.contains(possibleValue)) {
-                        value.setSolved(possibleValue)
+                digitValue.forEach {
+                    if (!possibleSet.contains(it)) {
+                        digitValue.setSolved(it)
                         reduceAllPossibleFromSolved()
                         return true
                     }
                 }
             }
-
-
         }
         return false
     }
@@ -128,9 +125,9 @@ class Board {
     fun guessOneAndSeeIfItWorks(targetCopy: Array<CharArray>): Board? {
         BOARD_INDEX_RANGE.forEach { row ->
             BOARD_INDEX_RANGE.forEach { col ->
-                val value = grids[row][col]
-                if (value.isNotSolved()) {
-                    value.possible.forEach {
+                val digitValue = grids[row][col]
+                if (digitValue.isNotSolved()) {
+                    digitValue.forEach {
                         val testBoard = Board(this)
                         testBoard.grids[row][col].setSolved(it)
                         val solvable = testBoard.solve(targetCopy)
@@ -147,18 +144,16 @@ class Board {
     /********************************************************
      * REDUCTION OF POSSIBLES BASED UPON SOLVED ONLY
      ********************************************************/
-    fun reduceAllPossibleFromSolved() {
+    private fun reduceAllPossibleFromSolved() {
         var newSolved = false
         BOARD_INDEX_RANGE.forEach { rowIndex ->
             BOARD_INDEX_RANGE.forEach { colIndex ->
-                val value = grids[rowIndex][colIndex]
-                if (value.isNotSolved()) {
-                    value.possible.removeAll(solvedCollectAll(rowIndex, colIndex))
-                    value.getSolved()?.let {
-                        // you just solved something, you need to update the ones
-                        // you just updated
-                        newSolved = true
-                    }
+                val digitValue = grids[rowIndex][colIndex]
+                if (digitValue.isNotSolved()) {
+                    digitValue.removeAllPossible(solvedCollectAll(rowIndex, colIndex))
+                    // you just solved something, you need to update the ones
+                    // you just updated
+                    newSolved = newSolved || digitValue.isSolved()
                 }
             }
         }
@@ -224,9 +219,9 @@ class Board {
                 val rowActual = rowOrigin + rowOffset
                 val colActual = colOrigin + colOffset
                 if (rowActual != rowExclude || colActual != colExclude) {
-                    val value = grids[rowActual][colActual]
-                    if (value.isNotSolved()) {
-                        possibles.addAll(value.possible)
+                    val digitValue = grids[rowActual][colActual]
+                    if (digitValue.isNotSolved()) {
+                        possibles.addAll(digitValue)
                     }
                 }
             }
@@ -239,9 +234,9 @@ class Board {
         val possibles = HashSet<Int>()
         BOARD_INDEX_RANGE.forEach { rowIndex ->
             if (rowIndex != rowExclude) {
-                val value = grids[rowIndex][colExclude]
-                if (value.isNotSolved()) {
-                    possibles.addAll(value.possible)
+                val digitValue = grids[rowIndex][colExclude]
+                if (digitValue.isNotSolved()) {
+                    possibles.addAll(digitValue)
                 }
             }
         }
@@ -253,9 +248,9 @@ class Board {
         val possibles = HashSet<Int>()
         BOARD_INDEX_RANGE.forEach { colIndex ->
             if (colIndex != colExclude) {
-                val value = grids[rowExclude][colIndex]
-                if (value.isNotSolved()) {
-                    possibles.addAll(value.possible)
+                val digitValue = grids[rowExclude][colIndex]
+                if (digitValue.isNotSolved()) {
+                    possibles.addAll(digitValue)
                 }
             }
         }
@@ -282,8 +277,8 @@ class Board {
                     THREE_TIMES.forEach { colOffset ->
                         val rowActual = rowFactor * 3 + rowOffSet
                         val colActual = colFactor * 3 + colOffset
-                        val value = grids[rowActual][colActual]
-                        value.getSolved()?.let {
+                        val digitValue = grids[rowActual][colActual]
+                        digitValue.getSolved()?.let {
                             if (allValues.contains(it)) {
                                 return (rowActual to colActual)
                             } else {
@@ -330,8 +325,8 @@ class Board {
     private fun findByEmptyPossibles(): Pair<Int, Int>? {
         BOARD_INDEX_RANGE.forEach { row ->
             BOARD_INDEX_RANGE.forEach { col ->
-                val value = grids[row][col]
-                if (value.possible.isEmpty()) {
+                val digitValue = grids[row][col]
+                if (digitValue.isNotValid()) {
                     return (row to col)
                 }
             }
@@ -379,7 +374,7 @@ class Board {
     }
 
     private fun appendRow(s: StringBuilder, startRow: Int) {
-        val row: Array<Value> = grids[startRow]
+        val row: Array<DigitValue> = grids[startRow]
         THREE_TIMES.forEach {
             append3GridValues(s, row, it * 3)
             if (it != THIRD_TIME) {
@@ -389,66 +384,11 @@ class Board {
         s.append("\n")
     }
 
-    private fun append3GridValues(s: StringBuilder, row: Array<Value>, startCol: Int) {
+    private fun append3GridValues(s: StringBuilder, row: Array<DigitValue>, startCol: Int) {
         s.append("${row[startCol]} ${row[startCol + 1]} ${row[startCol + 2]}")
     }
 
-
-    class Value {
-        var possible: HashSet<Int>
-
-        constructor() {
-            possible = fullSetFactory()
-        }
-
-        constructor(value: Value) {
-            possible = HashSet(value.possible)
-        }
-
-        fun setSolved(num: Int) {
-            possible = hashSetOf(num)
-        }
-
-        fun getSolved(): Int? {
-            return if (possible.size == 1) {
-                possible.first()
-            } else {
-                null
-            }
-        }
-
-        fun isNotSolved(): Boolean = (possible.size != 1)
-
-        override fun toString(): String {
-            return getSolved()?.toString() ?: WILDCARD_STR
-        }
-
-        companion object {
-            private fun fullSetFactory(): HashSet<Int> = hashSetOf(1,2,3,4,5,6,7,8,9)
-            val WILDCARD_CHAR = '.'
-            private val WILDCARD_STR = WILDCARD_CHAR.toString()
-            fun rowFactory(columnCount: Int): Array<Value> {
-                return if (columnCount <= 0) {
-                    emptyArray()
-                } else {
-                    Array(
-                        size = columnCount,
-                        init = { Value() }
-                    )
-                }
-            }
-            fun rowFactory(values: Array<Value>): Array<Value> {
-                return Array(
-                    size = values.size,
-                    init = { index ->
-                        Value(values[index])
-                    }
-                )
-            }
-        }
-    }
-
-    class DigitValue {
+    class DigitValue: Iterable<Int> {
         private var solved: Int
         private val possible: DigitSet
 
@@ -472,11 +412,15 @@ class Board {
 
         fun isNotSolved(): Boolean = !isSolved()
 
-        fun removeAll(iterable: Iterable<Int>) {
+        fun removeAllPossible(iterable: Iterable<Int>) {
             possible.removeAll(iterable)
             if (possible.getSize() == 1 && isNotSolved()) {
                 solved = possible.getFirst()
             }
+        }
+
+        override fun iterator(): Iterator<Int> {
+            return possible.iterator()
         }
 
         override fun toString(): String = getSolved()?.toString() ?: WILDCARD_STR
