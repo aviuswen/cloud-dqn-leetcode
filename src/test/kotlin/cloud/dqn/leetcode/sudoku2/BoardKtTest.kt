@@ -166,9 +166,4 @@ class BoardKtTest {
             Assert.assertTrue(guessBoard!!.allDone())
         }
     }
-
-    @Test
-    fun bitMaskingDeveloping() {
-
-    }
 }
