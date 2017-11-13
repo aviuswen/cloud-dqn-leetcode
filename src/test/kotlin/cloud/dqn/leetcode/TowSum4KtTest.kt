@@ -25,5 +25,22 @@ class TowSum4KtTest {
         Assert.assertTrue(TwoSum4Kt.Solution().findTarget(root,9))
         Assert.assertFalse(TwoSum4Kt.Solution().findTarget(root,900))
 
+        Assert.assertTrue(TwoSum4Kt.Solution().findTargetFaster(root,9))
+        Assert.assertFalse(TwoSum4Kt.Solution().findTargetFaster(root,900))
+    }
+    @Test
+    fun findTargetFasterTest() {
+
+        //[2,null,3]
+        // 9
+        /**
+         *    2
+         *    \
+         *    3
+         */
+        val root = TwoSum4Kt.TreeNode(2)
+        root.right = TwoSum4Kt.TreeNode(3)
+        Assert.assertFalse(TwoSum4Kt.Solution().findTargetFaster(root,6))
+
     }
 }

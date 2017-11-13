@@ -64,11 +64,29 @@ class TwoSum4Kt {
             var found = false
             root?.let {
                 iterateInOrder(it, body = { node ->
-                    val value = findButNotSelf(it, node, k - node.`val`)
                     findButNotSelf(it, node, k - node.`val`)?.let {
                         found = true
                     }
                 })
+            }
+            return found
+        }
+
+        fun findTargetFaster(root: TreeNode?, k: Int): Boolean {
+            var found = false
+            root?.let {
+                val targetToNode = HashMap<Int, TreeNode>()
+                iterateInOrder(it, body = { currentNode ->
+                    targetToNode[k - currentNode.`val`] = currentNode
+                } )
+                iterateInOrder(it, body = { currentNode ->
+                    targetToNode[currentNode.`val`]?.let { targetNode ->
+                        if (currentNode !== targetNode) {
+                            found = true
+                        }
+                    }
+                })
+
             }
             return found
         }
