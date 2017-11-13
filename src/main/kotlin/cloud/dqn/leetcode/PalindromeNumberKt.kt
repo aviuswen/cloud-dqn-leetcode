@@ -73,12 +73,9 @@ class PalindromeNumberKt {
         fun isPalindrome(x: Int): Boolean {
             if (x < 0) {
                 return false
-            } else if (x < 10) {
-                return true
             }
 
             var p = placeOfMostSignificantBit(x)
-
             var q = 0 // make q == least significant bit
 
             while (p > q) {
@@ -88,6 +85,7 @@ class PalindromeNumberKt {
                 p--
                 q++
             }
+
             return true
         }
     }
