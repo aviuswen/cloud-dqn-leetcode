@@ -42,5 +42,6 @@ class TowSum4KtTest {
         root.right = TwoSum4Kt.TreeNode(3)
         Assert.assertFalse(TwoSum4Kt.Solution().findTargetFaster(root,6))
 
+
     }
 }
