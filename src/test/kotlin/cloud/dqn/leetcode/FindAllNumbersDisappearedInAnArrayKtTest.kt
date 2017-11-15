@@ -2,6 +2,7 @@ package cloud.dqn.leetcode
 
 import org.junit.Assert
 import org.junit.Test
+import java.util.*
 
 class FindAllNumbersDisappearedInAnArrayKtTest {
     @Test
@@ -26,7 +27,19 @@ class FindAllNumbersDisappearedInAnArrayKtTest {
         val allThereOutOfOrder = s.findDisappearedNumbers(intArrayOf(1,3,2,5,4))
         Assert.assertTrue(allThere.isEmpty())
         Assert.assertTrue(allThereOutOfOrder.isEmpty())
+    }
 
+    @Test
+    fun timer() {
+        val s = FindAllNumbersDisappearedInAnArrayKt.Solution()
+        val rand = Random()
+        val size = Int.MAX_VALUE shr 8
+        val arr = ArrayList<Int>(size + 8)
+        for (i in 0 until size) {
+            arr.add(rand.nextInt(size) + 1)
+        }
+        s.findDisappearedNumbers(arr.toIntArray())
 
     }
+
 }

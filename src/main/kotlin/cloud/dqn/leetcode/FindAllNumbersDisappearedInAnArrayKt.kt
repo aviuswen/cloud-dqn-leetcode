@@ -36,9 +36,10 @@ class FindAllNumbersDisappearedInAnArrayKt {
         companion object {
             val VALUE_REMOVED = 0
         }
-        private fun swapUntilMatchingOrMissing(nums: IntArray, index: Int) {
-            var valueAtIndex: Int = 0
-            var valueFromIndex: Int = 0
+        private fun swapUntilMatchingOrMissing(nums: IntArray, index: Int): Int {
+            var valueAtIndex = 0
+            var valueFromIndex = 0
+            var timesLoopsRuns = 0
             val whatTheIndexShouldBe = index + 1
             while (true) {
                 valueAtIndex = nums[index]
@@ -52,13 +53,16 @@ class FindAllNumbersDisappearedInAnArrayKt {
                 }
                 nums[index] = valueFromIndex
                 nums[valueAtIndex - 1] = valueAtIndex
+                timesLoopsRuns++
             }
+            return timesLoopsRuns
         }
 
         fun findDisappearedNumbers(nums: IntArray): List<Int> {
             var index = 0
+            val timesLoopRuns = ArrayList<Int>()
             while (index < nums.size) {
-                swapUntilMatchingOrMissing(nums, index)
+                timesLoopRuns.add(swapUntilMatchingOrMissing(nums, index))
                 index++
             }
             index = 0
@@ -77,6 +81,8 @@ class FindAllNumbersDisappearedInAnArrayKt {
                 }
                 index++
             }
+            var total = 0
+            timesLoopRuns.forEach { total += it}
             return result
         }
     }
