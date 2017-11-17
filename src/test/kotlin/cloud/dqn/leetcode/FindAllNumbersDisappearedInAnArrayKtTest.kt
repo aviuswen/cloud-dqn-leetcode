@@ -38,6 +38,7 @@ class FindAllNumbersDisappearedInAnArrayKtTest {
         for (i in 0 until size) {
             arr.add(rand.nextInt(size) + 1)
         }
+        ArrayList<Int>().clear()
         s.findDisappearedNumbers(arr.toIntArray())
 
     }
