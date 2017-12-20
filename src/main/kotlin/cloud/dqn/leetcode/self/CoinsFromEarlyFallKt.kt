@@ -5,11 +5,11 @@ package cloud.dqn.leetcode.self
  * "Problem from after lunch"
  * Designer: JN
  */
-object CoinsFromEarlyFall {
+object CoinsFromEarlyFallKt {
     @JvmStatic fun main(args: Array<String>) {
         val coinValues = intArrayOf(5, 25, 50, 100)
         val possible = possibleSums(coinValues, intArrayOf(4, 3, 2, 1))
-        println("hi")
+        println(possible)
     }
 
     /**
