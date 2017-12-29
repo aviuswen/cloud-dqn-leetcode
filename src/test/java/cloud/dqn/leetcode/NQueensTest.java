@@ -9,6 +9,8 @@ public class NQueensTest {
     public void leetcode0() {
         int n = 1;
 
+        char[][] board = new char[1][1];
+        
         NQueens.Solution sl = new NQueens.Solution();
         long start = System.currentTimeMillis();
         List<List<String>> p =  sl.solveNQueens(n);
