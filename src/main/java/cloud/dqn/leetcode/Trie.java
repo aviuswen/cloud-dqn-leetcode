@@ -8,14 +8,59 @@ import java.util.HashMap;
 
     Note:
     You may assume that all inputs are consist of lowercase letters a-z.
+
+ * Your Trie object will be instantiated and called as such:
+ * Trie obj = new Trie();
+ * obj.insert(word);
+ * boolean param_2 = obj.search(word);
+ * boolean param_3 = obj.startsWith(prefix);
  */
 class Trie {
-    private class TrieNode {
-        private static final char END = '*';
-        HashMap<Character, TrieNode> children;
+    private class LowerCharMap <T> {
+        private static final int SIZE = 26;
+        private Object[] data;
 
-        public TrieNode() {
-            this.children = new HashMap<Character, TrieNode>();
+        LowerCharMap() {
+            this.data = new Object[SIZE];
+        }
+
+        public T get(char c) {
+            int index = convertToIndex(c);
+            if (index >= 0 && index < SIZE) {
+                return (T)(data[index]);
+            }
+            return null;
+            // return (T)(data[convertToIndex(c)]);
+        }
+
+        boolean put(char c, T t) {
+            int index = convertToIndex(c);
+            if (index >= 0 && index < SIZE) {
+                data[index] = t;
+                return true;
+            }
+            return false;
+            // data[convertToIndex(c)] = t;
+            // return true;
+        }
+
+        boolean containsKey(char c) {
+            int index = convertToIndex(c);
+            return index >= 0 && index < SIZE && data[index] != null;
+            // return data[convertToIndex(c)] != null;
+        }
+
+        private int convertToIndex(char c) {
+            return c - 'a';
+        }
+    }
+    private class TrieNode {
+        private boolean fullWord;
+        LowerCharMap<TrieNode> children;
+
+        TrieNode() {
+            this.children = new LowerCharMap();
+            this.fullWord = false;
         }
 
         public void append(char[] chars) {
@@ -23,7 +68,7 @@ class Trie {
             for (int i = 0; i < chars.length; i++) {
                 current = current.append(chars[i]);
             }
-            current.children.put(END, null);
+            current.fullWord = true;
         }
 
         private TrieNode append(char val) {
@@ -35,12 +80,12 @@ class Trie {
             return newNode;
         }
 
-        public boolean search(char[] chars) {
+        boolean search(char[] chars) {
             TrieNode current = startsWith(chars);
-            return current != null && current.children.containsKey(END);
+            return current != null && current.fullWord;
         }
 
-        public TrieNode startsWith(char[] prefix) {
+        TrieNode startsWith(char[] prefix) {
             TrieNode current = root;
             int index = 0;
             while (current != null && index < prefix.length) {
@@ -73,11 +118,3 @@ class Trie {
         return root.startsWith(prefix.toCharArray()) != null;
     }
 }
-
-/**
- * Your Trie object will be instantiated and called as such:
- * Trie obj = new Trie();
- * obj.insert(word);
- * boolean param_2 = obj.search(word);
- * boolean param_3 = obj.startsWith(prefix);
- */
